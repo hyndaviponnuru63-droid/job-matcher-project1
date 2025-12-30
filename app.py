@@ -1,5 +1,8 @@
-import sys, os
+import sys
+import os
+
 sys.path.append(os.path.dirname(__file__))
+
 
 import streamlit as st
 from auth import login, signup
@@ -118,6 +121,7 @@ if st.session_state.logged_in:
 
 
         
+
 
 
 
