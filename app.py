@@ -1,20 +1,19 @@
 import sys
 import os
-
 sys.path.append(os.path.dirname(__file__))
 import streamlit as st
-from auth import signup
+from auth import signup, login
 from db import get_connection
 from saved_jobs import save_job, remove_job
-
 
 # ------------------ Initialize session state ------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_id" not in st.session_state:
     st.session_state.user_id = None
-
-st.title("Job Matcher Project")
+if "title_shown" not in st.session_state:        # <-- Add this
+    st.title("Job Matcher Project")
+    st.session_state.title_shown = True          # <-- Add this
 
 # ================= SIGNUP =================
 st.subheader("Sign Up")
@@ -120,6 +119,7 @@ if st.session_state.logged_in:
 
 
         
+
 
 
 
