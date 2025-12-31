@@ -1,6 +1,5 @@
 import psycopg2
 import os
-
 def get_connection():
     return psycopg2.connect(
         host=os.environ["DB_HOST"],
@@ -10,5 +9,6 @@ def get_connection():
         port=os.environ.get("DB_PORT", "5432"),
         sslmode="require"
     )
-)
+
+
 
