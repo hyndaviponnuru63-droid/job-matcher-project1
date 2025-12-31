@@ -1,6 +1,4 @@
-from database.db import get_connection
-
-
+from db import get_connection
 def signup(username, password):
     conn = get_connection()
     cur = conn.cursor()
@@ -21,6 +19,7 @@ def login(username, password):
     user = cur.fetchone()
     conn.close()
     return user
+
 
 
 
