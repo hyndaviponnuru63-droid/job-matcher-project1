@@ -1,6 +1,5 @@
 import sys
 import os
-sys.path.append(os.path.dirname(__file__))
 import streamlit as st
 from auth import signup, login
 from db import get_connection
@@ -11,9 +10,9 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "user_id" not in st.session_state:
     st.session_state.user_id = None
-if "title_shown" not in st.session_state:        # <-- Add this
+if "title_shown" not in st.session_state:
     st.title("Job Matcher Project")
-    st.session_state.title_shown = True          # <-- Add this
+    st.session_state.title_shown = True
 
 # ================= SIGNUP =================
 st.subheader("Sign Up")
@@ -54,30 +53,34 @@ search_skill = st.text_input("Search jobs by skill:")
 # ================= SHOW JOBS + SAVE =================
 if st.session_state.logged_in:
     st.subheader("Available Jobs")
-
-    conn = get_connection()
-    cur = conn.cursor()
-    
-    if search_skill.strip() == "":
-        cur.execute("""
-            SELECT id, job_title, skills, company, 
-                   COALESCE(description,'') AS description, 
-                   COALESCE(location,'') AS location, 
-                   COALESCE(salary,'') AS salary
-            FROM jobs
-        """)
-    else:
-        cur.execute("""
-            SELECT id, job_title, skills, company, 
-                   COALESCE(description,'') AS description, 
-                   COALESCE(location,'') AS location, 
-                   COALESCE(salary,'') AS salary
-            FROM jobs
-            WHERE skills ILIKE %s
-        """, (f"%{search_skill}%",))
-    
-    jobs = cur.fetchall()
-    conn.close()
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        if search_skill.strip() == "":
+            cur.execute("""
+                SELECT id, job_title, skills, company, 
+                       COALESCE(description,'') AS description, 
+                       COALESCE(location,'') AS location, 
+                       COALESCE(salary,'') AS salary
+                FROM jobs
+            """)
+        else:
+            cur.execute("""
+                SELECT id, job_title, skills, company, 
+                       COALESCE(description,'') AS description, 
+                       COALESCE(location,'') AS location, 
+                       COALESCE(salary,'') AS salary
+                FROM jobs
+                WHERE skills ILIKE %s
+            """, (f"%{search_skill}%",))
+        
+        jobs = cur.fetchall()
+    except Exception as e:
+        st.error(f"Error fetching jobs: {e}")
+        jobs = []
+    finally:
+        conn.close() if conn else None
 
     if len(jobs) == 0:
         st.info("No jobs available in database.")
@@ -93,17 +96,21 @@ if st.session_state.logged_in:
 
     # ------------------ Show saved jobs ------------------
     st.subheader("Saved Jobs")
-
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT j.id, j.job_title, j.company, j.skills
-        FROM saved_jobs sj
-        JOIN jobs j ON sj.job_id = j.id
-        WHERE sj.user_id = %s
-    """, (st.session_state.user_id,))
-    saved_jobs = cur.fetchall()
-    conn.close()
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT j.id, j.job_title, j.company, j.skills
+            FROM saved_jobs sj
+            JOIN jobs j ON sj.job_id = j.id
+            WHERE sj.user_id = %s
+        """, (st.session_state.user_id,))
+        saved_jobs = cur.fetchall()
+    except Exception as e:
+        st.error(f"Error fetching saved jobs: {e}")
+        saved_jobs = []
+    finally:
+        conn.close() if conn else None
 
     if len(saved_jobs) == 0:
         st.info("You haven't saved any jobs yet.")
@@ -118,7 +125,9 @@ if st.session_state.logged_in:
     st.info(f"Logged in as User ID: {st.session_state.user_id}")
 
 
+
         
+
 
 
 
