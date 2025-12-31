@@ -6,7 +6,7 @@ import streamlit as st
 from auth import signup
 from db import get_connection
 from saved_jobs import save_job, remove_job
-st.title("Job Matcher Project")
+
 
 # ------------------ Initialize session state ------------------
 if "logged_in" not in st.session_state:
@@ -120,6 +120,7 @@ if st.session_state.logged_in:
 
 
         
+
 
 
 
