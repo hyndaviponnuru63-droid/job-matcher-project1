@@ -1,43 +1,31 @@
 from db import get_connection
-import psycopg2
 
 def signup(username, password):
-    conn = None
+    """
+    Registers a new user in the database safely.
+    Returns True if successful, False otherwise.
+    """
+    if not username or not password:
+        print("Signup error: Username or password is empty")
+        return False
+
     try:
         conn = get_connection()
         cur = conn.cursor()
+        # Use parameterized query to avoid SQL injection
         cur.execute(
             "INSERT INTO users (username, password) VALUES (%s, %s)",
             (username, password)
         )
         conn.commit()
+        cur.close()
+        conn.close()
         return True
-
-    except psycopg2.errors.UniqueViolation:
-        if conn:
-            conn.rollback()
+    except Exception as e:
+        print("Signup error:", e)
         return False
 
-    except Exception as e:
-        if conn:
-            conn.rollback()
-        raise e
 
-    finally:
-        if conn:
-            conn.close()
-
-
-def login(username, password):
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT id FROM users WHERE username=%s AND password=%s",
-        (username, password)
-    )
-    user = cur.fetchone()
-    conn.close()
-    return user
 
 
 
