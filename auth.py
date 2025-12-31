@@ -1,13 +1,27 @@
+# auth.py
 from db import get_connection
 
+def signup(username, password):
+    if not username or not password:
+        return False
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO users (username, password) VALUES (%s, %s)",
+            (username, password)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return True
+    except Exception as e:
+        print("Signup error:", e)
+        return False
+
 def login(username, password):
-    """
-    Checks if username and password exist in the database.
-    Returns user row if valid, else None.
-    """
     if not username or not password:
         return None
-
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -22,6 +36,8 @@ def login(username, password):
     except Exception as e:
         print("Login error:", e)
         return None
+
+
 
 
 
