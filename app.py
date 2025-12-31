@@ -2,12 +2,11 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(__file__))
-
-
 import streamlit as st
-from auth import login, signup
+from auth import signup
 from db import get_connection
 from saved_jobs import save_job, remove_job
+st.title("Job Matcher Project")
 
 # ------------------ Initialize session state ------------------
 if "logged_in" not in st.session_state:
@@ -19,15 +18,15 @@ st.title("Job Matcher Project")
 
 # ================= SIGNUP =================
 st.subheader("Sign Up")
-new_username = st.text_input("New Username", key="signup_username")
-new_password = st.text_input("New Password", type="password", key="signup_password")
+new_username = st.text_input("New Username")
+new_password = st.text_input("New Password", type="password")
 
 if st.button("Sign Up"):
-    if new_username.strip() != "" and new_password.strip() != "":
-        signup(new_username, new_password)
-        st.success("User created! You can now log in.")
+    success = signup(new_username, new_password)
+    if success:
+        st.success("Signup successful!")
     else:
-        st.error("Please enter username and password.")
+        st.error("Signup failed. Check console for details.")
 
 # ================= LOGIN =================
 st.subheader("Login")
@@ -121,6 +120,7 @@ if st.session_state.logged_in:
 
 
         
+
 
 
 
