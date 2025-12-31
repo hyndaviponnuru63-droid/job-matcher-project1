@@ -2,6 +2,10 @@
 from db import get_connection
 
 def signup(username, password):
+    """
+    Registers a new user in the database.
+    Returns True if successful, False otherwise.
+    """
     if not username or not password:
         return False
     try:
@@ -20,6 +24,10 @@ def signup(username, password):
         return False
 
 def login(username, password):
+    """
+    Validates user credentials.
+    Returns user row (id, username) if valid, else None.
+    """
     if not username or not password:
         return None
     try:
@@ -36,6 +44,8 @@ def login(username, password):
     except Exception as e:
         print("Login error:", e)
         return None
+
+
 
 
 
