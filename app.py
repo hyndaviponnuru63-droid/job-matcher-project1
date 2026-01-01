@@ -5,6 +5,27 @@ from saved_jobs import init_db, save_job, remove_job, get_saved_jobs
 
 # ---------- INIT DB ----------
 init_db()
+conn = get_connection()
+cur = conn.cursor()
+cur.execute("SELECT COUNT(*) FROM jobs")
+count = cur.fetchone()[0]
+
+if count == 0:
+    sample_jobs = [
+        ('Python Developer', 'TCS', 'Python, SQL'),
+        ('Frontend Developer', 'Infosys', 'HTML, CSS, JavaScript'),
+        ('Java Developer', 'Wipro', 'Java, Spring Boot')
+    ]
+    for job in sample_jobs:
+        cur.execute(
+            "INSERT INTO jobs (job_title, company, skills) VALUES (%s, %s, %s)",
+            job
+        )
+    conn.commit()
+
+cur.close()
+conn.close()
+
 
 # ---------- SESSION STATE ----------
 if "logged_in" not in st.session_state:
@@ -95,6 +116,7 @@ if st.session_state.logged_in:
                 st.success("Removed")
     else:
         st.info("You haven't saved any jobs yet.")
+
 
 
 
