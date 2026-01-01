@@ -1,61 +1,81 @@
-# auth.py
-import streamlit as st
+import psycopg2
 from db import get_connection
+import hashlib
 
+# ------------------ PASSWORD HASHING ------------------
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+# ------------------ CREATE USERS TABLE ------------------
+def create_users_table():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        )
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+# ------------------ SIGNUP FUNCTION ------------------
 def signup(username, password):
-    if not username or not password:
-        st.error("Username and password cannot be empty")
-        return False
+    create_users_table()  # 🔥 FIX: ensures table exists
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    hashed_password = hash_password(password)
 
     try:
-        conn = get_connection()
-        cur = conn.cursor()
-
-        # check if username already exists
-        cur.execute(
-            "SELECT id FROM users WHERE username = %s",
-            (username,)
-        )
-        if cur.fetchone():
-            st.error("Username already exists")
-            cur.close()
-            conn.close()
-            return False
-
-        # insert new user
         cur.execute(
             "INSERT INTO users (username, password) VALUES (%s, %s)",
-            (username, password)
+            (username, hashed_password)
         )
         conn.commit()
-
-        cur.close()
-        conn.close()
         return True
 
-    except Exception as e:
-        st.error(f"Signup error: {e}")   # THIS shows real error
+    except psycopg2.errors.UniqueViolation:
+        conn.rollback()
         return False
 
-
-def login(username, password):
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-
-        cur.execute(
-            "SELECT id, username FROM users WHERE username=%s AND password=%s",
-            (username, password)
-        )
-        user = cur.fetchone()
-
+    finally:
         cur.close()
         conn.close()
-        return user
 
-    except Exception as e:
-        st.error(f"Login error: {e}")
+
+# ------------------ LOGIN FUNCTION ------------------
+def login(username, password):
+    create_users_table()  # safety
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    hashed_password = hash_password(password)
+
+    cur.execute(
+        "SELECT id FROM users WHERE username=%s AND password=%s",
+        (username, hashed_password)
+    )
+
+    user = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    if user:
+        return user[0]  # return user_id
+    else:
         return None
+
+
 
 
 
