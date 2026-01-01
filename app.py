@@ -3,6 +3,24 @@ from auth import signup, login
 from db import get_connection
 from saved_jobs import save_job, remove_job
 
+def create_jobs_table():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS jobs (
+            id SERIAL PRIMARY KEY,
+            title TEXT NOT NULL,
+            company TEXT NOT NULL,
+            location TEXT,
+            description TEXT
+        );
+    """)
+
+    conn.commit()
+    cur.close()
+    conn.close()
+    
 # ------------------ Initialize session state ------------------
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -125,6 +143,7 @@ if st.session_state.logged_in:
 
 
         
+
 
 
 
