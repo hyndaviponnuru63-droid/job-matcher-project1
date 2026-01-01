@@ -2,12 +2,11 @@ import psycopg2
 from db import get_connection
 import hashlib
 
-# ------------------ PASSWORD HASHING ------------------
+
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 
-# ------------------ CREATE USERS TABLE ------------------
 def create_users_table():
     conn = get_connection()
     cur = conn.cursor()
@@ -17,7 +16,7 @@ def create_users_table():
             id SERIAL PRIMARY KEY,
             username TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL
-        )
+        );
     """)
 
     conn.commit()
@@ -25,9 +24,8 @@ def create_users_table():
     conn.close()
 
 
-# ------------------ SIGNUP FUNCTION ------------------
 def signup(username, password):
-    create_users_table()  # 🔥 FIX: ensures table exists
+    create_users_table()
 
     conn = get_connection()
     cur = conn.cursor()
@@ -37,13 +35,20 @@ def signup(username, password):
     try:
         cur.execute(
             "INSERT INTO users (username, password) VALUES (%s, %s)",
-            (username, hashed_password)
+            (username.strip(), hashed_password)
         )
         conn.commit()
+        print("✅ Signup successful")
         return True
 
-    except psycopg2.errors.UniqueViolation:
+    except psycopg2.IntegrityError as e:
         conn.rollback()
+        print("❌ Integrity Error:", e)
+        return False
+
+    except Exception as e:
+        conn.rollback()
+        print("❌ Signup Exception:", e)
         return False
 
     finally:
@@ -51,9 +56,8 @@ def signup(username, password):
         conn.close()
 
 
-# ------------------ LOGIN FUNCTION ------------------
 def login(username, password):
-    create_users_table()  # safety
+    create_users_table()
 
     conn = get_connection()
     cur = conn.cursor()
@@ -62,7 +66,7 @@ def login(username, password):
 
     cur.execute(
         "SELECT id FROM users WHERE username=%s AND password=%s",
-        (username, hashed_password)
+        (username.strip(), hashed_password)
     )
 
     user = cur.fetchone()
@@ -71,9 +75,10 @@ def login(username, password):
     conn.close()
 
     if user:
-        return user[0]  # return user_id
-    else:
-        return None
+        return user[0]
+    return None
+
+
 
 
 
