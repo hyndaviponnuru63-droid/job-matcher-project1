@@ -1,11 +1,20 @@
 from db import get_connection
 
 
-def create_tables():
+def init_db():
     conn = get_connection()
     cur = conn.cursor()
 
-    # Jobs table
+    # USERS table (needed for foreign key)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id SERIAL PRIMARY KEY,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL
+        );
+    """)
+
+    # JOBS table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS jobs (
             id SERIAL PRIMARY KEY,
@@ -15,7 +24,7 @@ def create_tables():
         );
     """)
 
-    # Saved jobs table
+    # SAVED JOBS table
     cur.execute("""
         CREATE TABLE IF NOT EXISTS saved_jobs (
             id SERIAL PRIMARY KEY,
@@ -31,8 +40,6 @@ def create_tables():
 
 
 def save_job(user_id, job_id):
-    create_tables()
-
     conn = get_connection()
     cur = conn.cursor()
 
@@ -64,8 +71,6 @@ def remove_job(user_id, job_id):
 
 
 def get_saved_jobs(user_id):
-    create_tables()
-
     conn = get_connection()
     cur = conn.cursor()
 
@@ -77,10 +82,11 @@ def get_saved_jobs(user_id):
     """, (user_id,))
 
     jobs = cur.fetchall()
-
     cur.close()
     conn.close()
     return jobs
+
+
 
 
 
