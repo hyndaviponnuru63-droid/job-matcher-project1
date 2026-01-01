@@ -16,13 +16,13 @@ if "title_shown" not in st.session_state:
 st.subheader("Sign Up")
 new_username = st.text_input("New Username")
 new_password = st.text_input("New Password", type="password")
-
 if st.button("Sign Up"):
     success = signup(new_username, new_password)
+
     if success:
-        st.success("Signup successful!")
+        st.success("Signup successful. Please login.")
     else:
-        st.error("Signup failed. Check console for details.")
+        st.error("Signup failed. Username may already exist.")
 
 # ================= LOGIN =================
 st.subheader("Login")
@@ -125,6 +125,7 @@ if st.session_state.logged_in:
 
 
         
+
 
 
 
