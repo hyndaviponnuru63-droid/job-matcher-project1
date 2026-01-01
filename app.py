@@ -5,26 +5,37 @@ from saved_jobs import init_db, save_job, remove_job, get_saved_jobs
 
 # ---------- INIT DB ----------
 init_db()
+
+# ---------- SEARCH JOBS ----------
+search = st.text_input("Search jobs (format: job_title, company, skills)", key="search_box")
 conn = get_connection()
 cur = conn.cursor()
-cur.execute("SELECT COUNT(*) FROM jobs")
-count = cur.fetchone()[0]
 
-if count == 0:
-    sample_jobs = [
-        ('Python Developer', 'TCS', 'Python, SQL'),
-        ('Frontend Developer', 'Infosys', 'HTML, CSS, JavaScript'),
-        ('Java Developer', 'Wipro', 'Java, Spring Boot')
-    ]
-    for job in sample_jobs:
-        cur.execute(
-            "INSERT INTO jobs (job_title, company, skills) VALUES (%s, %s, %s)",
-            job
-        )
-    conn.commit()
+if search:
+    # Split input by commas
+    parts = [p.strip() for p in search.split(",")]
+    
+    # Assign each part to its column or empty string
+    job_title = parts[0] if len(parts) > 0 else ""
+    company   = parts[1] if len(parts) > 1 else ""
+    skills    = parts[2] if len(parts) > 2 else ""
 
+    # SQL query with ILIKE (case-insensitive) and optional filters
+    cur.execute("""
+        SELECT id, job_title, company, skills
+        FROM jobs
+        WHERE job_title ILIKE %s
+          AND company ILIKE %s
+          AND skills ILIKE %s
+    """, (f"%{job_title}%", f"%{company}%", f"%{skills}%"))
+else:
+    # If nothing typed, show all jobs
+    cur.execute("SELECT id, job_title, company, skills FROM jobs")
+
+jobs = cur.fetchall()
 cur.close()
 conn.close()
+
 
 
 # ---------- SESSION STATE ----------
@@ -116,6 +127,7 @@ if st.session_state.logged_in:
                 st.success("Removed")
     else:
         st.info("You haven't saved any jobs yet.")
+
 
 
 
