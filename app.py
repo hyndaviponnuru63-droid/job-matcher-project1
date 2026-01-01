@@ -33,7 +33,7 @@ if st.button("Login"):
     user = login(username, password)
     if user:
         st.session_state.logged_in = True
-        st.session_state.user_id = user[0]
+        st.session_state.user_id = user
         st.success("Login successful")
     else:
         st.error("Invalid credentials")
@@ -125,6 +125,7 @@ if st.session_state.logged_in:
 
 
         
+
 
 
 
