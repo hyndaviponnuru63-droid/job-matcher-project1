@@ -1,7 +1,7 @@
 from db import get_connection
 
-# ------------------ CREATE TABLES ------------------
-def create_job_tables():
+
+def create_tables():
     conn = get_connection()
     cur = conn.cursor()
 
@@ -9,10 +9,9 @@ def create_job_tables():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS jobs (
             id SERIAL PRIMARY KEY,
-            title TEXT NOT NULL,
+            job_title TEXT NOT NULL,
             company TEXT NOT NULL,
-            location TEXT,
-            description TEXT
+            skills TEXT
         );
     """)
 
@@ -31,9 +30,8 @@ def create_job_tables():
     conn.close()
 
 
-# ------------------ SAVE JOB ------------------
 def save_job(user_id, job_id):
-    create_job_tables()
+    create_tables()
 
     conn = get_connection()
     cur = conn.cursor()
@@ -51,10 +49,7 @@ def save_job(user_id, job_id):
         conn.close()
 
 
-# ------------------ REMOVE JOB ------------------
 def remove_job(user_id, job_id):
-    create_job_tables()
-
     conn = get_connection()
     cur = conn.cursor()
 
@@ -68,15 +63,14 @@ def remove_job(user_id, job_id):
     conn.close()
 
 
-# ------------------ GET SAVED JOBS ------------------
 def get_saved_jobs(user_id):
-    create_job_tables()
+    create_tables()
 
     conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT j.id, j.title, j.company, j.location
+        SELECT j.id, j.job_title, j.company, j.skills
         FROM saved_jobs sj
         JOIN jobs j ON sj.job_id = j.id
         WHERE sj.user_id = %s
@@ -87,6 +81,8 @@ def get_saved_jobs(user_id):
     cur.close()
     conn.close()
     return jobs
+
+
 
 
 
