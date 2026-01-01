@@ -1,8 +1,9 @@
 import streamlit as st
 from auth import signup, login
 from db import get_connection
-from saved_jobs import save_job, remove_job, get_saved_jobs, create_tables
+from saved_jobs import init_db, save_job, remove_job, get_saved_jobs
 
+init_db()
 
 # ---------- INITIAL SETUP ----------
 create_tables()
@@ -78,3 +79,4 @@ if st.session_state.logged_in:
                 st.success("Removed")
     else:
         st.info("You haven't saved any jobs yet.")
+
