@@ -1,6 +1,6 @@
 import psycopg2
-from db import get_connection
 import hashlib
+from db import get_connection
 
 
 def hash_password(password):
@@ -30,25 +30,16 @@ def signup(username, password):
     conn = get_connection()
     cur = conn.cursor()
 
-    hashed_password = hash_password(password)
-
     try:
         cur.execute(
             "INSERT INTO users (username, password) VALUES (%s, %s)",
-            (username.strip(), hashed_password)
+            (username.strip(), hash_password(password))
         )
         conn.commit()
-        print("✅ Signup successful")
         return True
 
-    except psycopg2.IntegrityError as e:
+    except psycopg2.IntegrityError:
         conn.rollback()
-        print("❌ Integrity Error:", e)
-        return False
-
-    except Exception as e:
-        conn.rollback()
-        print("❌ Signup Exception:", e)
         return False
 
     finally:
@@ -62,11 +53,9 @@ def login(username, password):
     conn = get_connection()
     cur = conn.cursor()
 
-    hashed_password = hash_password(password)
-
     cur.execute(
         "SELECT id FROM users WHERE username=%s AND password=%s",
-        (username.strip(), hashed_password)
+        (username.strip(), hash_password(password))
     )
 
     user = cur.fetchone()
@@ -77,6 +66,8 @@ def login(username, password):
     if user:
         return user[0]
     return None
+
+
 
 
 
